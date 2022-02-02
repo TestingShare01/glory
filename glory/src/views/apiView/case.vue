@@ -8,17 +8,24 @@
 
       <div class="inputed" style="margin-top: 10px">
         <div style="display: inline; margin-left: 10px">
-          名称：&nbsp&nbsp&nbsp<el-input style="width: 400px" :v-model="name"></el-input>
+          名称：&nbsp&nbsp&nbsp<el-input
+            style="width: 400px"
+            v-model="name"
+          ></el-input>
         </div>
 
-        <div style="display: inline; margin-left: 100px" :v-model="remark">
-          备注：<el-input style="width: 400px"></el-input>
+        <div style="display: inline; margin-left: 100px">
+          备注：<el-input style="width: 400px" v-model="remark"></el-input>
         </div>
       </div>
 
       <div class="inputed" style="margin-top: 20px">
         <div style="display: inline; margin-left: 10px">
-          优先级：<el-select class="selects" v-model="priority" placeholder="请选择">
+          优先级：<el-select
+            class="selects"
+            v-model="priority"
+            placeholder="请选择"
+          >
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -30,13 +37,43 @@
         </div>
 
         <div style="display: inline; margin-left: 100px">
-          模块：<el-input style="width: 400px"></el-input>
+          模块：<el-select
+            v-model="mokuai"
+            filterable
+            placeholder="请选择"
+            class="selects"
+          >
+            <el-option
+              v-for="item in mokuais"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
         </div>
       </div>
 
       <div class="inputed" style="margin-top: 20px">
         <div style="display: inline; margin-left: 10px">
-          标签：&nbsp&nbsp&nbsp<el-input style="width: 400px"></el-input>
+          标签：&nbsp&nbsp&nbsp
+          <el-select
+            class="selects"
+            v-model="tag"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="请输入标签"
+          >
+            <el-option
+              v-for="item in tags"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
         </div>
       </div>
     </div>
@@ -52,17 +89,29 @@
           <div style="margin-top: 15px">
             <el-input
               placeholder="请输入URL"
-              v-model="input3"
+              v-model="url"
               class="input-with-select inputs"
             >
-              <el-select v-model="select" slot="prepend" placeholder="请选择">
+              <el-select
+                v-model="selectmethod"
+                slot="prepend"
+                placeholder="请选择"
+                style="width: 100px"
+              >
                 <el-option label="POST" value="POST"></el-option>
                 <el-option label="GET" value="GET"></el-option>
                 <el-option label="PUT" value="PUT"></el-option>
               </el-select>
             </el-input>
-            <el-button type="primary" class="urtbtn"> 运行</el-button>
-            <el-button type="primary" class="urtbtn"> 保存</el-button>
+            <el-button type="primary" class="urtbtn" @click="zx">
+              运行</el-button
+            >
+
+            <el-button type="primary" class="urtbtn" @click="apisave">
+              保存</el-button
+            >
+
+            <!-- <t-button theme="success" lass="urtbtn">保存</t-button> -->
 
             <el-button
               type="success"
@@ -72,19 +121,30 @@
             >
               Curl导入</el-button
             >
+            <el-button type="warning" class="urtbtn" @click="logs">
+              日志</el-button
+            >
           </div>
         </div>
 
         <div class="canshu">
-          <el-tabs v-model="activeName" @tab-click="handleClick">
+          <el-tabs v-model="activeName" >
             <el-tab-pane label="Body" name="first">
               <div
                 class="paramdatadiv"
                 v-for="(item, i) in datas"
                 :key="item.id"
               >
-                <el-input class="divinput" v-model="item.keys"></el-input>
-                <el-input class="divinputs" v-model="item.val"></el-input>
+                <el-input
+                  class="divinput"
+                  v-model="item.keys"
+                  placeholder="Key"
+                ></el-input>
+                <el-input
+                  class="divinputs"
+                  v-model="item.val"
+                  placeholder="Value"
+                ></el-input>
                 <el-button
                   class="btn2"
                   type="danger"
@@ -103,13 +163,21 @@
             </el-tab-pane>
 
             <el-tab-pane label="Hearders" name="second">
-               <div
+              <div
                 class="paramdatadiv"
                 v-for="(item, i) in headers"
                 :key="item.id"
               >
-                <el-input class="divinput" v-model="item.keys"></el-input>
-                <el-input class="divinputs" v-model="item.val"></el-input>
+                <el-input
+                  class="divinput"
+                  v-model="item.keys"
+                  placeholder="Key"
+                ></el-input>
+                <el-input
+                  class="divinputs"
+                  v-model="item.val"
+                  placeholder="Value"
+                ></el-input>
                 <el-button
                   class="btn2"
                   type="danger"
@@ -125,11 +193,52 @@
                   icon="el-icon-plus"
                 ></el-button>
               </div>
-
             </el-tab-pane>
 
+            <el-tab-pane label="Cookies" name="third">
+              <div
+                class="paramdatadiv"
+                v-for="(item, i) in cookies"
+                :key="item.id"
+              >
+                <el-input
+                  class="divinput"
+                  v-model="item.keys"
+                  placeholder="Key"
+                ></el-input>
+                <el-input
+                  class="divinputs"
+                  v-model="item.val"
+                  placeholder="Value"
+                ></el-input>
+                <el-button
+                  class="btn2"
+                  type="danger"
+                  @click="del_cookies(i)"
+                  v-show="!(cookies.length == i + 1)"
+                  icon="el-icon-minus"
+                ></el-button>
+                <el-button
+                  class="btn2"
+                  type="primary"
+                  @click="add_cookies"
+                  v-show="cookies.length == i + 1"
+                  icon="el-icon-plus"
+                ></el-button>
+              </div>
+            </el-tab-pane>
 
-            <el-tab-pane label="Cookies" name="third">角色管理</el-tab-pane>
+            <el-tab-pane label="提取器" name="four">
+              <el-row v-for="(item,i) in tiqu" :key="item.keyRule">
+                <el-col :span="6"> <el-input v-model="item.keyRule" placeholder="提取规则"></el-input></el-col>
+                <el-col :span="6" style="margin-left:20px"><el-input v-model="item.keyName" placeholder="赋值名称"></el-input></el-col>
+                <el-col :span="3"> 
+                  <el-button icon="el-icon-plus" @click="addtiqu"></el-button>
+                  <el-button icon="el-icon-minus" ></el-button>
+                </el-col>
+              </el-row>
+            </el-tab-pane>
+
           </el-tabs>
         </div>
       </div>
@@ -142,7 +251,70 @@
       </div>
 
       <div class="response">
-        <json-view :data="jsonData" />
+        <el-row type="flex" class="row-bg">
+          <!-- 返回json显示 -->
+          <el-col :span="15">
+            <json-view v-show="ifjson==1" :data="jsonData" />
+            <codemirror
+              v-show="ifjson==0"
+              style="width: 100%; height: 100%"
+              v-model="jsonData"
+              :options="cmOptions"
+            >
+            </codemirror>
+          </el-col>
+
+          <!-- 字段验证 -->
+          <el-col :span="9" class="yanzheng">
+            <div class="p">
+              <p class="pp" style="display: inline-block">验证字段</p>
+
+              <el-tooltip
+                class="item"
+                effect="dark"
+                :content="con"
+                placement="top-start"
+              >
+                <i
+                  class="el-icon-warning-outline"
+                  style="margin-left: 10px"
+                ></i>
+              </el-tooltip>
+
+              <i
+                class="el-icon-plus"
+                style="line-height: 75px; margin-right: 20px; float: right"
+                @click="addresult"
+              ></i>
+
+              <el-row
+                type="flex"
+                class="row-bg"
+                v-for="(item, i) in resultPk"
+                :key="item.id"
+              >
+                <el-col :span="12">
+                  <el-input
+                    v-model="item.keys"
+                    placeholder="请输入断言路径"
+                  ></el-input>
+                </el-col>
+
+                <el-col :span="6" style="margin-left: 10px"
+                  ><el-input
+                    v-model="item.expect"
+                    placeholder="预期结果"
+                  ></el-input
+                ></el-col>
+
+                <el-col :span="6" style="line-height: 40px; margin-left: 20px"
+                  ><i class="el-icon-success" v-if="item.status == 1"></i>
+                  <i class="el-icon-error" v-if="item.status == 2"></i>
+                </el-col>
+              </el-row>
+            </div>
+          </el-col>
+        </el-row>
       </div>
     </div>
 
@@ -152,102 +324,107 @@
       :append-to-body="true"
       :visible.sync="dialogVisible"
       width="50%"
-      :before-close="handleClose"
     >
       <el-input type="textarea" :rows="8" v-model="curldata"></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="curl"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="curl">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 日志右侧弹框 -->
+    <el-drawer
+      title="日志"
+      :visible.sync="table"
+      direction="rtl"
+      size="40%"
+      style="width: 100%"
+    >
+      <el-table :data="gridData">
+        <el-table-column
+          property="createtime"
+          label="日期"
+          width="150"
+        ></el-table-column>
+        <el-table-column
+          property="msg"
+          label="信息"
+          width="500px"
+        ></el-table-column>
+      </el-table>
+    </el-drawer>
   </div>
 </template>
 
 <script>
 import jsonView from "vue-json-views";
 
+import "codemirror/mode/javascript/javascript.js";
+import "codemirror/theme/material.css";
+import { codemirror } from "vue-codemirror";
+import "codemirror/lib/codemirror.css";
+
+import {
+  oneCase,
+  apiSave,
+  getOneCase,
+  getTagList,
+  getModel,
+  getlog,
+  SaveTiquValue
+} from "@/api/common.js";
+import { pk } from "@/api/tools.js";
 export default {
+  created() {
+    this.getid();
+    this.getTag();
+    this.getModelList();
+  },
   data() {
     return {
-      priority:"",
-      options:[
-        {value:"P0",label:"P0"},
-        {value:"P1",label:"P1"},
-        {value:"P2",label:"P2"},
-        {value:"P3",label:"P3"},
-      ],
-      jsonDatas: {},
-      jsonData: {
-        status: 1,
-        errorCode: 0,
-        errorMessage: "",
-        body: {
-          groupIns: 0,
-          faceToFaceAnswerer: 0,
-          institutionId: 2867,
-          insName: "爱学习北京名师课堂",
-          roles: ["teacher", "teacher_print"],
-          localDoubleTeacherListen: 0,
-          telephone: "15001000009",
-          institutionType: 1,
-          xiaoheBindStatus: 0,
-          menu: {
-            tr_qbkc: 1,
-            axg_jcsz_get_list: 1,
-            rxcp: 1,
-            bm_jwzx_zhgl: 1,
-            bm: 1,
-            tr_wdkc: 1,
-            qzqmcp: 1,
-            bm_zhxx_get_idleAccount: 1,
-            bm_zhxx_put_submitRenew: 1,
-            px_order_list: 1,
-            jy: 1,
-            tr_sy: 1,
-            axg_gkk_bj_get_teaching: 1,
-            bm_yxzx_zlzx_zszl: 1,
-            market_daily: 1,
-            bm_zhxx_get_shoppingRecord: 1,
-            xqcp: 1,
-            px_role_list: 1,
-            bm_zhxx_get_rsplist: 1,
-            bm_yxzx_zlzx: 1,
-            cp: 1,
-            bm_zhxx_get_accountDetail: 1,
-            px_subject_list: 1,
-            bm_zhxx: 1,
-            px_order_submit: 1,
-            bm_zhxx_accountSpendList: 1,
-            px_order_confirm: 1,
-            cpplfx: 1,
-            bsk: 1,
-            bm_zhxx_get_idlegroupList: 1,
-            bm_zhxx_get_renewAccountList: 1,
-            px_user_list: 1,
-            bm_zlxz: 1,
-            tr: 1,
-          },
-          userId: 2741019,
-          groupInsOrgType: 0,
-          portraitPath: "https://image.aixuexi.com/default.jpg",
-          insId: 2867,
-          logoPic: "http://img-test.aixuexi.com/FnY2FQgKMeg9L1iLluxaTMkaHu1G",
-          localDoubleTeacherSpeaker: 0,
-          doubleTeacherStatus: 2,
-          id: 2741019,
-          loveSchoolManage: 0,
-          username: "zyh09",
+      tiqu:[{"keyRule":"","keyName":""}],
+      ifjson:0,
+      cmOptions: {
+        tabSize: 4,
+        styleActiveLine: true,
+        lineNumbers: true,
+        line: true,
+        // mode: 'text/javascript',
+        mode:{
+          name:"javascript",
+          json:true
         },
-      },
+        lineWrapping: true,
+        theme: 'material'
+        },
+      table: false,
+      gridData: [],
+      cookies: [{ keys: "", val: "" }],
+      url: "",
+      remark: "",
+      name: "",
+      con: "断言支持多层级验证，可通过.的方式逐级查找：eg：info.user.name 如果存在列表可eg：info.user[2].name的方式查找",
+      priority: "",
+      options: [
+        { value: "P0", label: "P0" },
+        { value: "P1", label: "P1" },
+        { value: "P2", label: "P2" },
+        { value: "P3", label: "P3" },
+      ],
+      mokuais: [],
+      mokuai: "",
+      tags: [],
+      tag: [],
+      jsonData: {},
+
       curldata: "",
       dialogVisible: false,
       input3: "",
       activeName: "first",
-      select: "POST",
+      selectmethod: "POST",
+      resultPk: [{ keys: "", expect: "", result: "", status: 0 }],
       datas: [{ keys: "", val: "" }],
-      headers:[{ keys: "", val: "" }],
+      headers: [{ keys: "", val: "" }],
       formInline: {
         user: "",
         region: "",
@@ -255,9 +432,15 @@ export default {
     };
   },
   components: {
-    jsonView,
+    jsonView,codemirror
   },
   methods: {
+    addtiqu(){
+      this.tiqu.push({"keyRule":"","keyName":""})
+    },
+    addresult() {
+      this.resultPk.push({ keys: "", expect: "", result: "", status: 0 });
+    },
     handleClick() {
       console.log(1111);
     },
@@ -274,37 +457,242 @@ export default {
       this.headers.splice(id, 1);
     },
 
-    curl(){
-      var str = this.curldata.split(" ")
+     add_cookies() {
+      this.cookies.push({ keys: "", val: "" });
+    },
+    del_cookies(id) {
+      this.cookies.splice(id, 1);
+    },
 
-      var curl_head = []
-      for(var i in str){
+    // 获取curl解析
+    curl() {
+      var str = this.curldata.split(" ");
+      var curl_head = [];
+      var cook = []
+      for (var i in str) {
         var head_curl = {};
-        console.log(str[i])
         if(str[i]==="-H"){
-          head_curl["keys"] = str[parseInt(i)+1].replace(":","").replace("\"","")
-          head_curl["val"] = str[parseInt(i)+2].replace("\"","")
-          curl_head.push(head_curl)
+          head_curl["keys"] = str[parseInt(i) + 1].replace('"',"").replace(":","")
+          if(str[parseInt(i) + 1].replace('"',"").replace(":","")==="Cookie"){
+            for(var k=0;k<100;k++){
+              var cooke = {}
+              if(str[parseInt(i) + 2+k] != "-H"){
+                console.log(str[parseInt(i) + 2+k])
+                cooke["keys"] = str[parseInt(i) + 2+k].split("=")[0]
+                cooke["val"] = str[parseInt(i) + 2+k].split("=")[1].replace(";","").replace('"',"")
+              }else{
+                break
+              }
+              cook.push(cooke)
+            }
+          }
+          
+          var va = ""
+          for(var j=0;j<1000;j++){
+            if(str[parseInt(i) + 2 + j] !="-H" && str[parseInt(i) + 2 + j]!="--compressed" && str[parseInt(i) + 2 + j] != "--data" ){
+              va = va + str[parseInt(i) + 2 + j].replace('"',"")
+            }else{
+              head_curl["val"] = va
+              break
+            }
+          }
+  
+        curl_head.push(head_curl)
         }
         if(str[i]==="--compressed"){
-          this.input3 = str[parseInt(i)+1].replace("\"","").replace("\"","")
+          this.url = str[parseInt(i)+1].replace('"',"").replace('"',"")
         }
       }
-      this.headers = curl_head
-      this.dialogVisible = false
+      this.cookies = cook
+      var new_head = []
+      curl_head = curl_head.filter(item=>{
+        if(item.keys !="Cookie"){
+          new_head.push(item)
+        }
+      })
+      this.headers = new_head
+      this.dialogVisible = false;
+    },
+    // 运行
+    zx() {
+      var id = this.$route.query.id;
+      console.log(id);
+      oneCase(
+        id,
+        this.selectmethod,
+        this.url,
+        this.datas,
+        this.headers,
+        this.resultPk,
+        this.cookies
+      ).then((ress) => {
+        console.log(ress.data);
+        if (ress.data.res.code === 0) {
+          var ifstr = ress.data.res.response
+          if(ifstr.constructor != String){
+            console.log("非字符串")
+            this.ifjson = 1
+          }
+          console.log(ress.data.res.response)
+          this.jsonData = ress.data.res.response;
+    
+          
+        } else {
+          this.$message.error(ress.data.res.msg);
+        }
+
+        if (ress.data.result != null && ress.data.result != 0) {
+          this.resultPk = ress.data.result;
+        }
+      });
+    },
+
+    //接口保存
+    apisave() {
+      let id = this.$route.query.id;
+      if (
+        this.url != "" &&
+        this.name != "" &&
+        this.priority != "" &&
+        this.mokuai != "" &&
+        this.tag != []
+      ) {
+        var username = localStorage.getItem("user");
+        apiSave(
+          id,
+          username,
+          this.name,
+          this.remark,
+          this.priority,
+          this.mokuai,
+          this.tag,
+          this.url,
+          this.selectmethod,
+          this.datas,
+          this.headers,
+          this.cookies,
+          this.resultPk
+        ).then((res) => {
+          console.log(res.data);
+          this.$message.success(res.data);
+        });
+        if(id != undefined && this.tiqu[0]["keyRule"] !=""){
+          this.saveTiValue()
+          console.log("提取器已提交")
+        }else{
+          console.log("提取器信息不全")
+        }
+      } else {
+        this.$message.error("请填写全部内容哦！！！");
+      }
+    },
+
+    //获取url参数
+    getid() {
+      let id = this.$route.query.id;
+      if (id) {
+        console.log("走这里");
+        getOneCase(id).then((res) => {
+          var datass = res.data.api_list[0];
+          this.name = datass.name;
+          this.remark = datass.remark;
+          this.priority = datass.priority;
+          this.mokuai = datass.mokuai;
+          this.tag = eval(datass.tag);
+          this.selectmethod = datass.methods;
+          this.url = datass.url;
+          this.datas = eval(datass.bodys);
+          this.headers = eval(datass.headers);
+          this.cookies = eval(datass.cookie);
+          this.resultPk = eval(datass.resultPk);
+  
+          console.log(res.data.tiqu_list.length)
+          if (datass.extractor.length != 0){
+            this.tiqu = eval(datass.extractor)
+          }
+        });
+      }
+    },
+
+    //获取tagList数据
+    getTag() {
+      getTagList().then((res) => {
+        for (var i in res.data) {
+          this.tags.push(res.data[i]["name"]);
+        }
+      });
+    },
+
+    //获取所有模块
+    getModelList() {
+      getModel().then((res) => {
+        console.log(res.data);
+        var model = res.data.data;
+        for (var i in model) {
+          this.mokuais.push(model[i]["name"]);
+        }
+      });
+    },
+
+    //弹框log
+    logs() {
+      this.table = true;
+      this.logdata();
+    },
+    logdata() {
+      let id = this.$route.query.id;
+      getlog(id).then((res) => {
+        console.log(res.data);
+        this.gridData = res.data;
+      });
+    },
+
+    //保存时，上传提取器参数
+    saveTiValue(){
+      let id = this.$route.query.id;
+      console.log(this.tiqu)
+      SaveTiquValue(id,this.tiqu).then(res=>{
+        console.log(res.data)
+      })
     }
   },
 };
 </script>
 
-<style >
-.selects{
-  width: 400px;
+<style>
+.el-icon-error {
+  color: red;
+}
+.el-icon-success {
+  color: #00db00;
+  size: 10px;
+}
+.yanzheng {
+  height: 300px;
+  background-color: #ffffff;
 }
 .response {
-  text-align: left;
   width: 100%;
+  height: 400px;
+  text-align: left;
 }
+.response_left {
+  text-align: left;
+  width: 70%;
+  height: 400px;
+  background-color: antiquewhite;
+  float: left;
+}
+.response_right {
+  width: 30%;
+  height: 400px;
+
+  float: right;
+}
+.selects {
+  width: 400px;
+}
+
 .el-dialog__body {
   padding: 10px 20px;
 }
@@ -358,8 +746,8 @@ export default {
   float: left;
   margin-left: 20px;
 }
-.el-select .el-input {
-  width: 130px;
+.el-input {
+  width: 100%;
 }
 .input-with-select .el-input-group__prepend {
   background-color: #fff;
@@ -462,5 +850,8 @@ export default {
 }
 .el-form-item__content {
   display: inline-block;
+}
+.el-table__body {
+  width: 100%;
 }
 </style>

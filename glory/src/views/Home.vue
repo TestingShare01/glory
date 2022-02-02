@@ -1,8 +1,9 @@
 <template>
   <div>
-    <app-head></app-head>
+    <app-head :username="user"></app-head>
     <app-navigation></app-navigation>
     <app-preview></app-preview>
+
   </div>
 
 </template>
@@ -17,6 +18,19 @@ export default {
     AppNavigation,
     AppPreview,
   },
+  created(){
+    this.getNmae()
+  },
+  data(){
+    return{
+      user:""
+    }
+  },
+  methods:{
+    getNmae(){
+      this.user = localStorage.getItem("user")
+    }
+  }
 };
 </script>
 

@@ -15,7 +15,11 @@
         </template>
         <el-menu-item-group>
           <el-menu-item index="/project">项目管理</el-menu-item>
-          <el-menu-item index="1-2">选项2</el-menu-item>
+          <el-menu-item index="/caselist">接口列表</el-menu-item>
+          <el-menu-item index="/tasklist">任务列表</el-menu-item>
+          <el-menu-item index="/reportList">报告列表</el-menu-item>
+          <el-menu-item index="/gloab">变量配置</el-menu-item>
+          <el-menu-item index="/env">环境配置</el-menu-item>
         </el-menu-item-group>
       </el-submenu>
 
